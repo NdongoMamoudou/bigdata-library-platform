@@ -53,7 +53,7 @@ services:
       - "7077:7077"
     volumes:
       - ./app:/app
-      - ./spark_hdfs:/spark-hdfs
+      - ./batch-analyse:/batch-analyse
     environment:
       - INIT_DAEMON_STEP=setup_spark
 
