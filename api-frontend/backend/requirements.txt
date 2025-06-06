@@ -1,0 +1,4 @@
+kafka-python
+pyspark
+flask
+hdfs==2.6.0

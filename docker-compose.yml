@@ -115,7 +115,7 @@ services:
 
   python-producer:
     build:
-      context: .
+      context: ./api-frontend
       dockerfile: Dockerfile
     container_name: python-producer
     depends_on:
@@ -123,13 +123,13 @@ services:
     environment:
       - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
     volumes:
-      - ./app:/app
+      - ./api-frontend/backend:/app
     working_dir: /app
     command: [ "python", "-u", "producer.py" ]
 
   python-consumer:
     build:
-      context: .
+      context: ./api-frontend
       dockerfile: Dockerfile
     container_name: python-consumer
     depends_on:
@@ -137,9 +137,25 @@ services:
     environment:
       - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
     volumes:
-      - ./app:/app
+      - ./api-frontend/backend:/app
     working_dir: /app
     command: [ "python", "-u", "consumer.py" ]
+
+  backend:
+    build:
+      context: ./api-frontend
+      dockerfile: Dockerfile
+    container_name: backend
+    restart: always
+    ports:
+      - "5550:5550"
+    volumes:
+      - ./api-frontend/backend:/app
+    environment:
+      - FLASK_ENV=development
+    depends_on:
+      - kafka
+      - zookeeper
 
 volumes:
   hadoop_namenode:

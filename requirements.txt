@@ -4,3 +4,4 @@ hdfs==2.6.0
 kafka-python
 pandas
 hdfs
+pyspark
