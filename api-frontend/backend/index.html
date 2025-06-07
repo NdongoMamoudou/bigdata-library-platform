@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Bibliothèque - Application</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            margin: 0;
+            background: #f0f4f8;
+            color: #333;
+        }
+
+        header {
+            background-color: #4a90e2;
+            color: white;
+            padding: 1rem;
+            text-align: center;
+        }
+
+        nav {
+            display: flex;
+            justify-content: center;
+            background: #357abd;
+        }
+
+        nav button {
+            flex: 1;
+            padding: 1rem 0;
+            border: none;
+            background-color: #357abd;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            font-size: 1.1rem;
+        }
+
+        nav button:hover:not(.active) {
+            background-color: #285a8e;
+        }
+
+        nav button.active {
+            background-color: #1d3e6a;
+            cursor: default;
+        }
+
+        main {
+            max-width: 1000px;
+            margin: 1rem auto 2rem;
+            padding: 0 1rem;
+            min-height: 400px;
+        }
+
+        .page {
+            display: none;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        /* === Catalogue styles === */
+        .cards-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1rem;
+        }
+
+        .card {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgb(0 0 0 / 0.1);
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            transition: transform 0.2s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .card h3 {
+            margin-top: 0;
+            font-size: 1.2rem;
+            color: #2c3e50;
+        }
+
+        .card p {
+            margin: 0.3rem 0;
+            flex-grow: 1;
+            color: #555;
+        }
+
+        .card .stock {
+            font-weight: bold;
+            margin-top: 0.5rem;
+            color: #2a7f62;
+        }
+
+        .card button {
+            background-color: #4caf50;
+            border: none;
+            padding: 0.5rem 0.8rem;
+            color: white;
+            font-weight: bold;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            margin-top: 0.7rem;
+        }
+
+        .card button:disabled {
+            background-color: #a5d6a7;
+            cursor: default;
+        }
+
+        .card button:hover:not(:disabled) {
+            background-color: #388e3c;
+        }
+
+        /* Pagination Controls */
+        .pagination {
+            margin-top: 1rem;
+            text-align: center;
+        }
+
+        .pagination button {
+            background-color: #357abd;
+            border: none;
+            color: white;
+            padding: 0.5rem 1rem;
+            margin: 0 0.5rem;
+            cursor: pointer;
+            border-radius: 4px;
+            font-weight: bold;
+            transition: background-color 0.3s ease;
+        }
+
+        .pagination button:disabled {
+            background-color: #a0bce5;
+            cursor: default;
+        }
+
+        .pagination button:hover:enabled {
+            background-color: #285a8e;
+        }
+
+        /* === Retour styles === */
+        #retourForm {
+            max-width: 400px;
+            margin: auto;
+            background: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgb(0 0 0 / 0.1);
+        }
+
+        #retourForm label {
+            display: block;
+            margin-bottom: 0.3rem;
+            font-weight: bold;
+        }
+
+        #retourForm input[type="text"] {
+            width: 100%;
+            padding: 0.5rem;
+            margin-bottom: 1rem;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+            font-size: 1rem;
+        }
+
+        #retourForm button {
+            width: 100%;
+            background-color: #4caf50;
+            border: none;
+            padding: 0.7rem;
+            color: white;
+            font-weight: bold;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background-color 0.3s ease;
+        }
+
+        #retourForm button:hover {
+            background-color: #388e3c;
+        }
+
+        /* === Stats styles === */
+        #statsList {
+            max-width: 600px;
+            margin: auto;
+            background: white;
+            padding: 1rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgb(0 0 0 / 0.1);
+        }
+
+        #statsList table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        #statsList th,
+        #statsList td {
+            padding: 0.7rem 1rem;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        #statsList th {
+            background-color: #357abd;
+            color: white;
+        }
+
+        /* Message */
+        .message {
+            max-width: 600px;
+            margin: 1rem auto;
+            padding: 1rem;
+            border-radius: 6px;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .message.success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .message.error {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <h1>Bibliothèque</h1>
+    </header>
+    <nav>
+        <button id="tabCatalogue" class="active">Catalogue</button>
+        <button id="tabRetour">Retourner un livre</button>
+        <button id="tabStats">Statistiques</button>
+    </nav>
+    <main>
+        <!-- PAGE CATALOGUE -->
+        <section id="pageCatalogue" class="page active">
+            <div class="cards-container" id="livresContainer"></div>
+            <div class="pagination">
+                <button id="prevPage">← Précédent</button>
+                <span id="pageInfo">Page 1</span>
+                <button id="nextPage">Suivant →</button>
+            </div>
+        </section>
+
+        <!-- PAGE RETOUR -->
+        <section id="pageRetour" class="page">
+            <form id="retourForm">
+                <label for="isbnRetour">ISBN du livre à retourner :</label>
+                <input type="text" id="isbnRetour" name="isbnRetour" placeholder="Entrez l'ISBN" required />
+                <button type="submit">Retourner</button>
+            </form>
+            <div id="retourMessage"></div>
+        </section>
+
+        <!-- PAGE STATISTIQUES -->
+        <section id="pageStats" class="page">
+            <h2>Top 3 auteurs les plus empruntés</h2>
+            <div id="statsList">Chargement...</div>
+        </section>
+    </main>
+
+    <script>
+        const API_BASE = "http://localhost:5550";
+
+        // === Gestion du menu onglets ===
+        const tabs = {
+            tabCatalogue: document.getElementById("tabCatalogue"),
+            tabRetour: document.getElementById("tabRetour"),
+            tabStats: document.getElementById("tabStats")
+        };
+
+        const pages = {
+            pageCatalogue: document.getElementById("pageCatalogue"),
+            pageRetour: document.getElementById("pageRetour"),
+            pageStats: document.getElementById("pageStats")
+        };
+
+        function setActiveTab(activeTabId) {
+            // Onglets
+            for (const tabId in tabs) {
+                if (tabId === activeTabId) {
+                    tabs[tabId].classList.add("active");
+                } else {
+                    tabs[tabId].classList.remove("active");
+                }
+            }
+            // Pages
+            for (const pageId in pages) {
+                if (pageId === "page" + activeTabId.slice(3)) {
+                    pages[pageId].classList.add("active");
+                } else {
+                    pages[pageId].classList.remove("active");
+                }
+            }
+        }
+
+        for (const tabId in tabs) {
+            tabs[tabId].addEventListener("click", () => {
+                setActiveTab(tabId);
+                if (tabId === "tabCatalogue") {
+                    chargerLivres();
+                } else if (tabId === "tabStats") {
+                    chargerStats();
+                }
+            });
+        }
+
+        // === Catalogue ===
+        let currentPage = 1;
+        const pageSize = 8;
+        let totalLivres = 0;
+
+        const livresContainer = document.getElementById("livresContainer");
+        const pageInfo = document.getElementById("pageInfo");
+        const btnPrev = document.getElementById("prevPage");
+        const btnNext = document.getElementById("nextPage");
+
+        btnPrev.addEventListener("click", () => {
+            if (currentPage > 1) {
+                currentPage--;
+                chargerLivres();
+            }
+        });
+
+        btnNext.addEventListener("click", () => {
+            if (currentPage * pageSize < totalLivres) {
+                currentPage++;
+                chargerLivres();
+            }
+        });
+
+        async function chargerLivres() {
+            livresContainer.innerHTML = "Chargement...";
+            try {
+                const response = await fetch(
+                    `${API_BASE}/api/livres?page=${currentPage}&size=${pageSize}`
+                );
+                if (!response.ok) {
+                    livresContainer.innerHTML = `<p>Erreur lors du chargement des livres (${response.status})</p>`;
+                    return;
+                }
+                const data = await response.json();
+                totalLivres = data.total;
+
+                pageInfo.textContent = `Page ${data.page} / ${Math.ceil(totalLivres / pageSize)}`;
+                btnPrev.disabled = currentPage === 1;
+                btnNext.disabled = currentPage * pageSize >= totalLivres;
+
+                afficherLivres(data.livres);
+            } catch (error) {
+                livresContainer.innerHTML = `<p>Erreur réseau : ${error.message}</p>`;
+            }
+        }
+
+        function afficherLivres(livres) {
+            if (!livres.length) {
+                livresContainer.innerHTML = "<p>Aucun livre trouvé.</p>";
+                return;
+            }
+            livresContainer.innerHTML = livres
+                .map(
+                    (livre) => `
+        <div class="card">
+          <h3>${livre.titre || "Titre inconnu"}</h3>
+          <p><strong>Auteur:</strong> ${livre.auteur || "Inconnu"}</p>
+          <p><strong>ISBN:</strong> ${livre.isbn}</p>
+          <p class="stock">Stock actuel: ${livre.stock_actuel}</p>
+          <button ${livre.stock_actuel > 0 ? "" : "disabled"} onclick="emprunterLivre('${livre.isbn}')">
+            Emprunter
+          </button>
+        </div>
+      `
+                )
+                .join("");
+        }
+
+        async function emprunterLivre(isbn) {
+            try {
+                const res = await fetch(`${API_BASE}/api/emprunter/${isbn}`, {
+                    method: "POST",
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    alert("Emprunt enregistré !");
+                    chargerLivres();
+                } else {
+                    alert("Erreur : " + (data.error || "Action impossible"));
+                }
+            } catch (err) {
+                alert("Erreur réseau : " + err.message);
+            }
+        }
+
+        // === Retour ===
+        const retourForm = document.getElementById("retourForm");
+        const retourMessage = document.getElementById("retourMessage");
+
+        retourForm.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const isbn = document.getElementById("isbnRetour").value.trim();
+            retourMessage.innerHTML = "";
+            if (!isbn) {
+                retourMessage.innerHTML = `<div class="message error">Veuillez entrer un ISBN valide.</div>`;
+                return;
+            }
+            try {
+                const res = await fetch(`${API_BASE}/api/retourner/${isbn}`, {
+                    method: "POST",
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    retourMessage.innerHTML = `<div class="message success">Retour enregistré avec succès !</div>`;
+                    retourForm.reset();
+                    // Refresh catalogue in case stock updated
+                    if (tabs.tabCatalogue.classList.contains("active")) {
+                        chargerLivres();
+                    }
+                } else {
+                    retourMessage.innerHTML = `<div class="message error">Erreur : ${data.error || "Action impossible"}</div>`;
+                }
+            } catch (err) {
+                retourMessage.innerHTML = `<div class="message error">Erreur réseau : ${err.message}</div>`;
+            }
+        });
+
+        // === Statistiques ===
+        const statsList = document.getElementById("statsList");
+
+        async function chargerStats() {
+            statsList.innerHTML = "Chargement...";
+            try {
+                const res = await fetch(`${API_BASE}/api/statistiques/top-auteurs`);
+                if (!res.ok) {
+                    statsList.innerHTML = `<p>Erreur lors du chargement des statistiques (${res.status})</p>`;
+                    return;
+                }
+                const data = await res.json();
+
+                if (!data.length) {
+                    statsList.innerHTML = "<p>Aucune statistique disponible.</p>";
+                    return;
+                }
+
+                statsList.innerHTML = `
+          <table>
+            <thead>
+              <tr><th>Auteur</th><th>Total_exemplaires</th></tr>
+            </thead>
+            <tbody>
+              ${data
+                        .map(
+                            (auteur) =>
+                                `<tr><td>${auteur.auteur}</td><td>${auteur.nb_exemplaires}</td></tr>`
+                        )
+                        .join("")}
+            </tbody>
+          </table>
+        `;
+            } catch (err) {
+                statsList.innerHTML = `<p>Erreur réseau : ${err.message}</p>`;
+            }
+        }
+
+
+        // Initial load
+        chargerLivres();
+    </script>
+</body>
+
+</html>

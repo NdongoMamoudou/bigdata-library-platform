@@ -2,3 +2,4 @@ kafka-python
 pyspark
 flask
 hdfs==2.6.0
+flask_cors
